@@ -56,7 +56,21 @@ fn find_pattern(
     if i {
         if line.to_lowercase().contains(&pattern.to_lowercase()) {
             if !v {
-                let line = line.replace(pattern, styled_pattern);
+                let idx: Vec<usize> = line
+                    .to_lowercase()
+                    .match_indices(&pattern.to_lowercase())
+                    .map(|(index, _)| index)
+                    .collect();
+                let length = pattern.len();
+                let mut line = line;
+                for i in idx.iter().rev() {
+                    let pattern = &line[*i..*i + length];
+                    let styled_pattern = Style::new()
+                        .fg(ansi_term::Color::Red)
+                        .paint(pattern)
+                        .to_string();
+                    line.replace_range(*i..*i + length, &styled_pattern);
+                }
                 return Some(line);
             }
         } else if v {
